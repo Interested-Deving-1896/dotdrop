@@ -92,7 +92,8 @@ class Cmd(DictParser):
                 self.log.dbg(f'action cmd: \"{cmd}\"')
             self.log.sub(f'executing \"{cmd}\"')
         try:
-            ret = subprocess.call(cmd, shell=True)
+            shellexec = os.environ.get("SHELL", "/bin/sh")
+            ret = subprocess.call(cmd, shell=True, executable=shellexec)
         except KeyboardInterrupt:
             self.log.warn(f'{self.descr} interrupted')
         if ret != 0:
