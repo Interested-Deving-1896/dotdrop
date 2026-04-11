@@ -11,7 +11,7 @@ cur=$(cd "$(dirname "${0}")" && pwd)
 version=$(grep version "${cur}"/../dotdrop/version.py | sed 's/^.*= .\(.*\).$/\1/g')
 
 if ! hash txt2man 2>/dev/null; then
-  echo "install txt2man"
+  echo "ERROR - install \"txt2man\" first"
   exit 1
 fi
 
