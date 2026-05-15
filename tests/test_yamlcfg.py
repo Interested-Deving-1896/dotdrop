@@ -225,6 +225,78 @@ profiles:
         conf = Cfg(confpath, debug=True)
         self.assertTrue(conf is not None)
 
+    def test_include_dag_without_loop(self):
+        """ensure DAG includes do not trigger loop detection"""
+        tmp = get_tempdir()
+        self.assertTrue(os.path.exists(tmp))
+        self.addCleanup(clean, tmp)
+
+        confpath = create_fake_config(tmp,
+                                      configname=self.CONFIG_NAME,
+                                      dotpath=self.CONFIG_DOTPATH,
+                                      backup=self.CONFIG_BACKUP,
+                                      create=self.CONFIG_CREATE)
+
+        content = yaml_load(confpath)
+        content['profiles'] = {
+                'top': {'include': ['left', 'right']},
+                'left': {'include': ['bottom'], 'variables': {'from_left': 'L'}},
+                'right': {'include': ['bottom'], 'variables': {'from_right': 'R'}},
+                'bottom': {'variables': {'from_bottom': 'B'}}
+                }
+        yaml_dump(content, confpath)
+
+        cfg = Cfg(confpath, profile='top', debug=True)
+        self.assertEqual(cfg.variables.get('from_bottom'), 'B')
+        self.assertEqual(cfg.variables.get('from_left'), 'L')
+        self.assertEqual(cfg.variables.get('from_right'), 'R')
+
+    def test_include_loop_detection(self):
+        """detect include cycles between profiles"""
+        tmp = get_tempdir()
+        self.assertTrue(os.path.exists(tmp))
+        self.addCleanup(clean, tmp)
+
+        confpath = create_fake_config(tmp,
+                                      configname=self.CONFIG_NAME,
+                                      dotpath=self.CONFIG_DOTPATH,
+                                      backup=self.CONFIG_BACKUP,
+                                      create=self.CONFIG_CREATE)
+
+        content = yaml_load(confpath)
+        content['profiles'] = {
+                'a': {'include': ['b']},
+                'b': {'include': ['a']}
+                }
+        yaml_dump(content, confpath)
+
+        with self.assertRaises(YamlException):
+            Cfg(confpath, profile='a', debug=True)
+
+    def test_include_dag_user_example(self):
+        """user-reported DAG includes should not be treated as loops"""
+        tmp = get_tempdir()
+        self.assertTrue(os.path.exists(tmp))
+        self.addCleanup(clean, tmp)
+
+        confpath = create_fake_config(tmp,
+                                      configname=self.CONFIG_NAME,
+                                      dotpath=self.CONFIG_DOTPATH,
+                                      backup=self.CONFIG_BACKUP,
+                                      create=self.CONFIG_CREATE)
+
+        content = yaml_load(confpath)
+        content['profiles'] = {
+                'top': {'include': ['left', 'right']},
+                'left': {'include': ['bottom']},
+                'right': {'include': ['bottom']},
+                'bottom': {}
+                }
+        yaml_dump(content, confpath)
+
+        cfg = Cfg(confpath, profile='top', debug=True)
+        self.assertIsNotNone(cfg)
+
     def test_import_configs_merge(self):
         """Test import_configs when all config keys merge."""
         tmp = get_tempdir()
