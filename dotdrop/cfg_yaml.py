@@ -896,7 +896,7 @@ class CfgYaml:
         profiles = [self._profile] + self._inc_profiles
         items = {}
         for profile in profiles:
-            seen = [self._profile]
+            seen = [profile] if profile else []
             i = self.__get_profile_included_item(profile, keyitem, seen)
             items = self._merge_dict(i, items)
         return items
@@ -914,9 +914,9 @@ class CfgYaml:
         for inherited_profile in pentry.get(self.key_profile_include, []):
             if inherited_profile == profile or inherited_profile in seen:
                 raise YamlException('\"include\" loop')
-            seen.append(inherited_profile)
             new = self.__get_profile_included_item(inherited_profile,
-                                                   keyitem, seen)
+                                                   keyitem,
+                                                   seen + [inherited_profile])
             if self._debug:
                 msg = f'included {keyitem} from {inherited_profile}: {new}'
                 self._dbg(msg)
