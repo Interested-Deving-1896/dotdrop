@@ -96,44 +96,6 @@ example) won't be *seen* by the higher layer until the config is reloaded. Consi
 `dirty` flag as a sign the file needs to be written and its representation in higher
 levels in not accurate anymore.
 
-## Precedence
-
-* `dynvariables` > `variables`
-* Profile `(dyn)variables` > any other `(dyn)variables`
-* Profile `(dyn)variables` > profile's included `(dyn)variables`
-* Imported `variables`/`dynvariables` > `(dyn)variables`
-
-When `import_configs` importing config's elements except the `(dyn)variables`
-will take precedence in case of name clash
-(see <https://github.com/deadc0de6/dotdrop/issues/443>).
-
-## Variable resolution
-
-How variables are resolved (through Jinja2's
-templating) in the config file.
-
-* Resolve main config file variables
-  * Merge `variables` and `dynvariables` (allowing cyclic references)
-  * Recursively template merged `variables` and `dynvariables`
-  * `dynvariables` are executed
-  * Profile's `variables` and `dynvariables` are merged
-* Resolve *included* entries (see below)
-  * Paths and entries are templated
-    (allows using something like `include {{@@ os @@}}.variables.yaml`)
-* *included* entries are processed
-  * dyn-/variables are all resolved in their own file
-
-Potential *included* entries:
-
-* Entry *import_actions*
-* Entry *import_configs*
-* Entry *import_variables*
-* Profile's *import*
-* Profile's *include*
-
-Variables are then used to resolve different elements in the config file:
-see [this](docs/config/config-file.md#variables).
-
 ## Rules
 
 * `dynvariables` are executed in their own config file
@@ -208,6 +170,32 @@ for a match with the ignore patterns.
   before printing
 * patterns are matched against both files
   (in dotpath and in filesystem)
+
+## Variable resolution
+
+How variables are resolved (through Jinja2's templating) in the config file.
+
+* Resolve main config file variables
+  * Merge `variables` and `dynvariables` (allowing cyclic references)
+  * Recursively template merged `variables` and `dynvariables`
+  * `dynvariables` are executed
+  * Profile's `variables` and `dynvariables` are merged
+* Resolve *included* entries (see below)
+  * Paths and entries are templated
+    (allows using something like `include {{@@ os @@}}.variables.yaml`)
+* *included* entries are processed
+  * dyn-/variables are all resolved in their own file
+
+Potential *included* entries:
+
+* Entry *import_actions*
+* Entry *import_configs*
+* Entry *import_variables*
+* Profile's *import*
+* Profile's *include*
+
+Variables are then used to resolve different elements in the config file:
+see [this](docs/config/config-file.md#variables).
 
 # Testing
 
