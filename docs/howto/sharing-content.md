@@ -72,7 +72,7 @@ solution consists of using
 2. Adding some variables in the merged dotfile via templating.
 3. Overriding them with different values in each profile via profile variables.
 4. Typically, making the dotfile `dst` dynamic, as different profiles need
-    usually to deploy the dotfiles in different locations.
+    usually to deploy their dotfiles to different locations.
 
 **NOTE**: This technique does *not* require two different `dotfiles` entry in
 `config.yaml`.

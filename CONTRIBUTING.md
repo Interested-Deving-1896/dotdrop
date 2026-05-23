@@ -4,7 +4,6 @@ Contents
 * [Config parsing](#config-parsing)
   * [Lower layer](#lower-layer)
   * [Higher layer](#higher-layer)
-  * [Precedence](#precedence)
   * [Variable resolution](#variable-resolution)
   * [Rules](#rules)
   * [Ignore pattern](#ignore-pattern)
@@ -96,21 +95,9 @@ example) won't be *seen* by the higher layer until the config is reloaded. Consi
 `dirty` flag as a sign the file needs to be written and its representation in higher
 levels in not accurate anymore.
 
-## Precedence
-
-* `dynvariables` > `variables`
-* Profile `(dyn)variables` > any other `(dyn)variables`
-* Profile `(dyn)variables` > profile's included `(dyn)variables`
-* Imported `variables`/`dynvariables` > `(dyn)variables`
-
-When `import_configs` importing config's elements except the `(dyn)variables`
-will take precedence in case of name clash
-(see <https://github.com/deadc0de6/dotdrop/issues/443>).
-
 ## Variable resolution
 
-How variables are resolved (through Jinja2's
-templating) in the config file.
+How variables are resolved (through Jinja2's templating) in the config file.
 
 * Resolve main config file variables
   * Merge `variables` and `dynvariables` (allowing cyclic references)
