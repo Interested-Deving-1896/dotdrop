@@ -4,7 +4,6 @@ Contents
 * [Config parsing](#config-parsing)
   * [Lower layer](#lower-layer)
   * [Higher layer](#higher-layer)
-  * [Precedence](#precedence)
   * [Variable resolution](#variable-resolution)
   * [Rules](#rules)
   * [Ignore pattern](#ignore-pattern)
