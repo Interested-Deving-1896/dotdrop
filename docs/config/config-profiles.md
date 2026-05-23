@@ -1,7 +1,7 @@
 # Profiles entry
 
-The mandatory profiles entry contains a YAML object with sub-objects defining
-each profile and its related dotfiles, variables, actions, and other configuration.
+The mandatory `profiles` entry contains a YAML object with sub-objects defining
+each profile and its related dotfiles, variables, actions, and other configurations.
 The entries in the sub-objects are as follows:
 
 Entry    | Description
@@ -11,7 +11,7 @@ Entry    | Description
 `include` | Include all elements (dotfiles, actions, (dyn)variables, etc) from another profile (See [Include dotfiles from another profile](config-profiles.md#profile-include-entry) and [meta profiles](../howto/group-hosts.md))
 `variables` | Profile-specific variables (See [Variables](config-file.md#variables))
 `dynvariables` | Profile-specific interpreted variables (See [Interpreted variables](config-dynvars.md))
-`actions` | List of action keys that are defined in the [actions](config-actions.md) entry (See [actions](config-actions.md))
+`actions` | List of action keys defined in the [actions](config-actions.md) entry (See [actions](config-actions.md))
 
 ```yaml
 <some-profile-name-usually-the-hostname>:
