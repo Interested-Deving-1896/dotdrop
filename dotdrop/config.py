@@ -5,7 +5,11 @@ Copyright (c) 2024, deadc0de6
 default config
 """
 
-DEFAULT_CONFIG = """config:
+from typing import Final
+
+__all__ = ['DEFAULT_CONFIG']
+
+DEFAULT_CONFIG: Final[str] = """config:
   backup: true
   banner: true
   create: true

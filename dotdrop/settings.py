@@ -6,6 +6,8 @@ settings block
 """
 
 import os
+from typing import Dict, List, Optional, Union
+
 from dotdrop.exceptions import YamlException
 
 # local imports
@@ -13,12 +15,15 @@ from dotdrop.linktypes import LinkTypes
 from dotdrop.dictparser import DictParser
 from dotdrop.utils import is_bin_in_path
 
+__all__ = ['Settings']
+
 
 ENV_WORKDIR = 'DOTDROP_WORKDIR'
 
 
 class Settings(DictParser):
     """Settings block in config"""
+    # pylint: disable=too-many-instance-attributes
     # key in yaml file
     key_yaml = 'config'
 
@@ -61,23 +66,39 @@ class Settings(DictParser):
     # defaults
     default_diff_cmd = 'diff -r -u {0} {1}'
 
-    def __init__(self, backup=True, banner=True,
-                 create=True, default_actions=None, dotpath='dotfiles',
-                 ignoreempty=False, import_actions=None, import_configs=None,
-                 import_variables=None, keepdot=False,
-                 link_dotfile_default=LinkTypes.NOLINK,
-                 link_on_import=LinkTypes.NOLINK, longkey=False,
-                 upignore=None, cmpignore=None, instignore=None,
-                 impignore=None, workdir='~/.config/dotdrop',
-                 showdiff=False, minversion=None,
-                 func_file=None, filter_file=None,
-                 diff_command=default_diff_cmd,
-                 template_dotfile_default=True,
-                 ignore_missing_in_dotdrop=False,
-                 force_chmod=False, chmod_on_import=False,
-                 check_version=False, clear_workdir=False,
-                 compare_workdir=False, key_prefix=True,
-                 key_separator='_'):
+    # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+    def __init__(self, backup: bool = True, banner: bool = True,
+                 create: bool = True,
+                 default_actions: Optional[List[str]] = None,
+                 dotpath: str = 'dotfiles',
+                 ignoreempty: bool = False,
+                 import_actions: Optional[List[str]] = None,
+                 import_configs: Optional[List[str]] = None,
+                 import_variables: Optional[List[str]] = None,
+                 keepdot: bool = False,
+                 link_dotfile_default: Union[LinkTypes, str] =
+                 LinkTypes.NOLINK,
+                 link_on_import: Union[LinkTypes, str] = LinkTypes.NOLINK,
+                 longkey: bool = False,
+                 upignore: Optional[List[str]] = None,
+                 cmpignore: Optional[List[str]] = None,
+                 instignore: Optional[List[str]] = None,
+                 impignore: Optional[List[str]] = None,
+                 workdir: str = '~/.config/dotdrop',
+                 showdiff: bool = False,
+                 minversion: Optional[str] = None,
+                 func_file: Optional[List[str]] = None,
+                 filter_file: Optional[List[str]] = None,
+                 diff_command: str = default_diff_cmd,
+                 template_dotfile_default: bool = True,
+                 ignore_missing_in_dotdrop: bool = False,
+                 force_chmod: bool = False,
+                 chmod_on_import: bool = False,
+                 check_version: bool = False,
+                 clear_workdir: bool = False,
+                 compare_workdir: bool = False,
+                 key_prefix: bool = True,
+                 key_separator: str = '_') -> None:
         self.backup = backup
         self.banner = banner
         self.create = create
@@ -118,12 +139,12 @@ class Settings(DictParser):
             err = f'bad diff_command: {diff_command}'
             raise YamlException(err)
 
-    def _serialize_seq(self, name, dic):
+    def _serialize_seq(self, name: str, dic: Dict[str, object]) -> None:
         """serialize attribute 'name' into 'dic'"""
         seq = getattr(self, name)
         dic[name] = seq
 
-    def serialize(self):
+    def serialize(self) -> Dict[str, Dict[str, object]]:
         """Return key-value pair representation of the settings"""
         dic = {
             self.key_backup: self.backup,

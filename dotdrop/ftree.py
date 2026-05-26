@@ -7,10 +7,13 @@ filesystem tree for directories
 
 
 import os
+from typing import List, Optional, Tuple
 
 # local imports
 from dotdrop.utils import must_ignore, dir_empty
 from dotdrop.logger import Logger
+
+__all__ = ['FTreeDir']
 
 
 class FTreeDir:
@@ -18,11 +21,12 @@ class FTreeDir:
     directory tree for comparison
     """
 
-    def __init__(self, path, ignores=None, debug=False):
+    def __init__(self, path: str, ignores: Optional[List[str]] = None,
+                 debug: bool = False):
         self.path = path
         self.ignores = ignores
         self.debug = debug
-        self.entries = []
+        self.entries: List[str] = []
         self.log = Logger(debug=self.debug)
         if os.path.exists(path) and os.path.isdir(path):
             self._walk()
@@ -59,11 +63,12 @@ class FTreeDir:
                 self.log.dbg(f'added dir to list of {self.path}: {dpath}')
                 self.entries.append(dpath)
 
-    def get_entries(self):
+    def get_entries(self) -> List[str]:
         """return all entries"""
         return self.entries
 
-    def compare(self, other):
+    def compare(self, other: 'FTreeDir') -> Tuple[List[str], List[str],
+                                                  List[str]]:
         """
         compare two trees and returns
         - left_only (only in self)

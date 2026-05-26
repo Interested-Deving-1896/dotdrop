@@ -7,25 +7,27 @@ provide logging functions
 
 import sys
 import inspect
+from typing import ClassVar
 
 
 class Logger:
     """logging facility for dotdrop"""
 
-    RED = '\033[91m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    MAGENTA = '\033[95m'
-    LMAGENTA = '\033[35m'
-    RESET = '\033[0m'
-    EMPH = '\033[33m'
-    BOLD = '\033[1m'
+    RED: ClassVar[str] = '\033[91m'
+    GREEN: ClassVar[str] = '\033[92m'
+    YELLOW: ClassVar[str] = '\033[93m'
+    BLUE: ClassVar[str] = '\033[94m'
+    MAGENTA: ClassVar[str] = '\033[95m'
+    LMAGENTA: ClassVar[str] = '\033[35m'
+    RESET: ClassVar[str] = '\033[0m'
+    EMPH: ClassVar[str] = '\033[33m'
+    BOLD: ClassVar[str] = '\033[1m'
 
-    def __init__(self, debug=False):
+    def __init__(self, debug: bool = False):
         self.debug = debug
 
-    def log(self, string, end='\n', pre='', bold=False):
+    def log(self, string: str, end: str = '\n', pre: str = '',
+            bold: bool = False) -> None:
         """normal log"""
         cstart = self._color(self.BLUE)
         cend = self._color(self.RESET)
@@ -37,13 +39,13 @@ class Logger:
             fmt = f'{pre}{cstart}{string}{end}{cend}'
         sys.stdout.write(fmt)
 
-    def sub(self, string, end='\n'):
+    def sub(self, string: str, end: str = '\n') -> None:
         """sub log"""
         cstart = self._color(self.BLUE)
         cend = self._color(self.RESET)
         sys.stdout.write(f'\t{cstart}->{cend} {string}{end}')
 
-    def emph(self, string, stdout=True):
+    def emph(self, string: str, stdout: bool = True) -> None:
         """emphasis log"""
         cstart = self._color(self.EMPH)
         cend = self._color(self.RESET)
@@ -53,20 +55,20 @@ class Logger:
         else:
             sys.stdout.write(content)
 
-    def err(self, string, end='\n'):
+    def err(self, string: str, end: str = '\n') -> None:
         """error log"""
         cstart = self._color(self.RED)
         cend = self._color(self.RESET)
         msg = f'{string} {end}'
         sys.stderr.write(f'{cstart}[ERR] {msg}{cend}')
 
-    def warn(self, string, end='\n'):
+    def warn(self, string: str, end: str = '\n') -> None:
         """warning log"""
         cstart = self._color(self.YELLOW)
         cend = self._color(self.RESET)
         sys.stderr.write(f'{cstart}[WARN] {string} {end}{cend}')
 
-    def dbg(self, string, force=False):
+    def dbg(self, string: str, force: bool = False) -> None:
         """debug log"""
         if not force and not self.debug:
             return
@@ -81,18 +83,18 @@ class Logger:
         line += f'{cend}{cstart} {string}{cend}\n'
         sys.stderr.write(line)
 
-    def dry(self, string, end='\n'):
+    def dry(self, string: str, end: str = '\n') -> None:
         """dry run log"""
         cstart = self._color(self.GREEN)
         cend = self._color(self.RESET)
         sys.stdout.write(f'{cstart}[DRY] {string} {end}{cend}')
 
     @classmethod
-    def raw(cls, string, end='\n'):
+    def raw(cls, string: str, end: str = '\n') -> None:
         """raw log"""
         sys.stdout.write(f'{string}{end}')
 
-    def ask(self, query):
+    def ask(self, query: str) -> bool:
         """ask user for confirmation"""
         cstart = self._color(self.BLUE)
         cend = self._color(self.RESET)
@@ -102,7 +104,7 @@ class Logger:
         return resp == 'y'
 
     @classmethod
-    def _color(cls, col):
+    def _color(cls, col: str) -> str:
         """is color supported"""
         if not sys.stdout.isatty():
             return ''

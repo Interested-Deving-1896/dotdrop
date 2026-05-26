@@ -5,7 +5,13 @@ Copyright (c) 2019, deadc0de6
 dictionary parser abstract class
 """
 
+from typing import Any, Dict, List, Mapping, Type, TypeVar
+
 from dotdrop.logger import Logger
+
+__all__ = ['DictParser']
+
+T = TypeVar('T', bound='DictParser')
 
 
 class DictParser:
@@ -14,12 +20,12 @@ class DictParser:
     log = Logger()
 
     @classmethod
-    def _adjust_yaml_keys(cls, value):
+    def _adjust_yaml_keys(cls, value: Dict[str, Any]) -> Dict[str, Any]:
         """adjust value for object 'cls'"""
         return value
 
     @classmethod
-    def parse(cls, key, value):
+    def parse(cls: Type[T], key: Any, value: Dict[str, Any]) -> T:
         """parse (key,value) and construct object 'cls'"""
         tmp = value
         try:
@@ -32,7 +38,9 @@ class DictParser:
         return cls(key=key, **newv)
 
     @classmethod
-    def parse_dict(cls, items):
+    def parse_dict(
+            cls: Type[T],
+            items: Mapping[Any, Dict[str, Any]]) -> List[T]:
         """parse a dictionary and construct object 'cls'"""
         if not items:
             return []
