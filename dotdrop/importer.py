@@ -7,6 +7,7 @@ handle import of dotfiles
 
 import os
 import shutil
+from typing import List, Optional
 
 # local imports
 from dotdrop.logger import Logger
@@ -19,13 +20,20 @@ from dotdrop.comparator import Comparator
 from dotdrop.templategen import Templategen
 from dotdrop.exceptions import UndefinedException
 
+__all__ = ['Importer']
+
 
 class Importer:
     """dotfile importer"""
+    # pylint: disable=too-many-instance-attributes,too-few-public-methods
 
-    def __init__(self, profile, conf, dotpath, diff_cmd,
-                 variables, dry=False, safe=True, debug=False,
-                 keepdot=True, ignore=None, forcekey=None):
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def __init__(self, profile: object, conf: object, dotpath: str,
+                 diff_cmd: str,
+                 variables: dict, dry: bool = False, safe: bool = True,
+                 debug: bool = False,
+                 keepdot: bool = True, ignore: Optional[List[str]] = None,
+                 forcekey: Optional[str] = None):
         """constructor
         @profile: the selected profile
         @conf: configuration manager (CfgAggregator)
@@ -52,7 +60,7 @@ class Importer:
         self.safe = safe
         self.debug = debug
         self.keepdot = keepdot
-        self.ignore = []
+        self.ignore: List[str] = []
         self.forcekey = forcekey
         self.log = Logger(debug=self.debug)
 
@@ -75,11 +83,11 @@ class Importer:
 
         self.umask = get_umask()
 
-    def import_path(self, path, import_as=None,
-                    import_link=LinkTypes.NOLINK,
-                    import_mode=False,
-                    trans_install="",
-                    trans_update=""):
+    def import_path(self, path: str, import_as: Optional[str] = None,
+                    import_link: LinkTypes = LinkTypes.NOLINK,
+                    import_mode: bool = False,
+                    trans_install: str = "",
+                    trans_update: str = "") -> int:
         """
         import a dotfile pointed by path
         returns:
@@ -107,11 +115,11 @@ class Importer:
                             trans_update=tupdate,
                             trans_install=tinstall)
 
-    def _import(self, path, import_as=None,
-                import_link=LinkTypes.NOLINK,
-                import_mode=False,
-                trans_install=None,
-                trans_update=None):
+    def _import(self, path: str, import_as: Optional[str] = None,
+                import_link: LinkTypes = LinkTypes.NOLINK,
+                import_mode: bool = False,
+                trans_install: Optional[object] = None,
+                trans_update: Optional[object] = None) -> int:
         """
         import path
         returns:
@@ -178,10 +186,10 @@ class Importer:
                                       trans_update=trans_update,
                                       trans_install=trans_install)
 
-    def _import_in_config(self, path, src, dst, perm,
-                          linktype, import_mode,
-                          trans_install=None,
-                          trans_update=None):
+    def _import_in_config(self, path: str, src: str, dst: str, perm: int,
+                          linktype: LinkTypes, import_mode: bool,
+                          trans_install: Optional[object] = None,
+                          trans_update: Optional[object] = None) -> int:
         """
         import path
         returns:
@@ -209,7 +217,7 @@ class Importer:
         self.log.sub(f'\"{path}\" imported')
         return 1
 
-    def _check_existing_dotfile(self, src, dst):
+    def _check_existing_dotfile(self, src: str, dst: str) -> bool:
         """
         check if a dotfile file in the dotpath
         already exists for this src
@@ -232,7 +240,8 @@ class Importer:
             self.log.dbg('will overwrite existing file')
         return True
 
-    def _import_to_dotpath(self, in_dotpath, in_fs, trans_update=None):
+    def _import_to_dotpath(self, in_dotpath: str, in_fs: str,
+                           trans_update: Optional[object] = None) -> bool:
         """
         copy files to dotpath
         """
@@ -278,7 +287,7 @@ class Importer:
 
         return os.path.exists(in_dotpath_abs)
 
-    def _import_file_to_dotpath(self, src, dst):
+    def _import_file_to_dotpath(self, src: str, dst: str) -> bool:
         self.log.dbg(f'importing {src} to {dst}')
         try:
             os.makedirs(os.path.dirname(dst), exist_ok=True)
@@ -288,7 +297,7 @@ class Importer:
             return False
         return True
 
-    def _already_exists(self, src, dst):
+    def _already_exists(self, src: str, dst: str) -> bool:
         """
         test no other dotfile exists with same
         dst for this profile but different src
@@ -308,14 +317,15 @@ class Importer:
                 return True
         return False
 
-    def _ignore(self, path):
+    def _ignore(self, path: str) -> bool:
         if must_ignore([path], self.ignore, debug=self.debug):
             self.log.dbg(f'ignoring import of {path}')
             self.log.warn(f'{path} ignored')
             return True
         return False
 
-    def _apply_trans_update(self, path, trans):
+    def _apply_trans_update(self, path: str,
+                            trans: Optional[object]) -> Optional[str]:
         """
         apply transformation to path on filesystem)
         returns

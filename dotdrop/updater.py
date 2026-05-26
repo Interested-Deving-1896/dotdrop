@@ -8,6 +8,7 @@ handle the update of dotfiles
 import os
 import shutil
 import filecmp
+from typing import List, Optional
 
 # local imports
 from dotdrop.logger import Logger
@@ -18,17 +19,22 @@ from dotdrop.utils import ignores_to_absolute, removepath, \
     mirror_file_rights, get_file_perm, diff
 from dotdrop.exceptions import UndefinedException
 
+__all__ = ['Updater']
+
 
 TILD = '~'
 
 
 class Updater:
     """dotfiles updater"""
+    # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, dotpath, variables, conf,
-                 profile_key, dry=False, safe=True,
-                 debug=False, ignore=None, showpatch=False,
-                 ignore_missing_in_dotdrop=False):
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def __init__(self, dotpath: str, variables: dict, conf: object,
+                 profile_key: str, dry: bool = False, safe: bool = True,
+                 debug: bool = False, ignore: Optional[List[str]] = None,
+                 showpatch: bool = False,
+                 ignore_missing_in_dotdrop: bool = False):
         """constructor
         @dotpath: path where dotfiles are stored
         @variables: dictionary of variables for the templates
@@ -47,7 +53,7 @@ class Updater:
         self.dry = dry
         self.safe = safe
         self.debug = debug
-        self.ignore = ignore or []
+        self.ignore: List[str] = ignore or []
         self.showpatch = showpatch
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
         self.templater = Templategen(variables=self.variables,
@@ -57,7 +63,7 @@ class Updater:
         self.tvars = self.templater.add_tmp_vars()
         self.log = Logger(debug=self.debug)
 
-    def update_path(self, path):
+    def update_path(self, path: str) -> bool:
         """update the dotfile installed on path"""
         path = os.path.expanduser(path)
         if not os.path.lexists(path):
@@ -79,7 +85,7 @@ class Updater:
                 return False
         return True
 
-    def update_key(self, key):
+    def update_key(self, key: str) -> bool:
         """update the dotfile referenced by key"""
         dotfile = self.conf.get_dotfile(key, profile_key=self.profile_key)
         if not dotfile:
@@ -91,7 +97,7 @@ class Updater:
         path = self.conf.path_to_dotfile_dst(dotfile.dst)
         return self._update(path, dotfile)
 
-    def _update(self, path, dotfile):
+    def _update(self, path: str, dotfile: object) -> bool:
         """update dotfile from file pointed by path"""
         ret = False
         new_path = None
@@ -155,7 +161,7 @@ class Updater:
             removepath(new_path, logger=self.log)
         return ret
 
-    def _apply_trans_update(self, path, dotfile):
+    def _apply_trans_update(self, path: str, dotfile: object) -> Optional[str]:
         """apply write transformation to dotfile"""
         trans = dotfile.get_trans_update()
         if not trans:
@@ -175,7 +181,7 @@ class Updater:
             return None
         return tmp
 
-    def _is_template(self, path):
+    def _is_template(self, path: str) -> bool:
         if not Templategen.path_is_template(path,
                                             debug=self.debug):
             self.log.dbg(f'{path} is NO template')
@@ -183,7 +189,7 @@ class Updater:
         self.log.warn(f'{path} uses template, update manually')
         return True
 
-    def _show_patch(self, fpath, tpath):
+    def _show_patch(self, fpath: str, tpath: str) -> bool:
         """provide a way to manually patch the template"""
         content = self._resolve_template(tpath)
         tmp = write_to_tmpfile(content)
@@ -193,12 +199,12 @@ class Updater:
         self.log.warn(f'try patching with: \"{cmdss}\"')
         return False
 
-    def _resolve_template(self, tpath):
+    def _resolve_template(self, tpath: str) -> str:
         """resolve the template to a temporary file"""
         self.templater.restore_vars(self.tvars)
         return self.templater.generate(tpath)
 
-    def _same_rights(self, left, right):
+    def _same_rights(self, left: str, right: str) -> bool:
         """return True if files have the same modes"""
         try:
             lefts = get_file_perm(left)
@@ -208,7 +214,7 @@ class Updater:
             self.log.err(exc)
             return False
 
-    def _mirror_file_perms(self, src, dst):
+    def _mirror_file_perms(self, src: str, dst: str) -> None:
         srcr = get_file_perm(src)
         dstr = get_file_perm(dst)
         if srcr == dstr:
@@ -220,8 +226,8 @@ class Updater:
         except OSError as exc:
             self.log.err(exc)
 
-    def _handle_file(self, deployed_path, local_path,
-                     ignores, compare=True):
+    def _handle_file(self, deployed_path: str, local_path: str,
+                     ignores: List[str], compare: bool = True) -> bool:
         """sync path (deployed file) and local_path (dotdrop dotfile path)"""
         if self._must_ignore([deployed_path, local_path], ignores):
             self.log.sub(f'\"{local_path}\" ignored')
@@ -258,8 +264,9 @@ class Updater:
             return False
         return True
 
-    def _handle_dir(self, deployed_path, local_path,
-                    dotfile, ignores):
+    # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals,too-many-branches,too-many-statements
+    def _handle_dir(self, deployed_path: str, local_path: str,
+                    dotfile: object, ignores: List[str]) -> bool:
         """sync path (local dir) and local_path (dotdrop dir path)"""
         ret = True
         self.log.dbg(f'handle update for dir {deployed_path} to {local_path}')
@@ -345,21 +352,21 @@ class Updater:
             self.log.sub(f'\"{dstpath}\" content updated')
         return ret
 
-    def _overwrite(self, src, dst):
+    def _overwrite(self, src: str, dst: str) -> bool:
         """ask for overwritting"""
         msg = f'Overwrite \"{dst}\" with \"{src}\"?'
         if self.safe and not self.log.ask(msg):
             return False
         return True
 
-    def _confirm_rm_r(self, directory):
+    def _confirm_rm_r(self, directory: str) -> bool:
         """ask for rm -r directory"""
         msg = f'Recursively remove \"{directory}\"?'
         if self.safe and not self.log.ask(msg):
             return False
         return True
 
-    def _must_ignore(self, paths, ignores):
+    def _must_ignore(self, paths: List[str], ignores: List[str]) -> bool:
         if must_ignore(paths, ignores, debug=self.debug):
             self.log.dbg(f'ignoring update for {paths}')
             return True

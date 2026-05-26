@@ -18,6 +18,10 @@ import shutil
 import json
 import sys
 from pathlib import PurePath
+from typing import (
+    Any, Callable, List, Optional, Sequence, Tuple,
+)
+
 import requests
 from packaging import version
 
@@ -27,21 +31,21 @@ from dotdrop.exceptions import UnmetDependency
 from dotdrop.version import __version__ as VERSION
 
 LOG = Logger()
-STAR = '*'
+STAR: str = '*'
 # the environment variable for temporary
 ENV_TEMP = 'DOTDROP_TMPDIR'
 # the temporary directory
-TMPDIR = None
+TMPDIR: Optional[str] = None
 
 # files dotdrop refuses to remove
-DONOTDELETE = [
+DONOTDELETE: List[str] = [
     os.path.expanduser('~'),
     os.path.expanduser('~/.config'),
 ]
-NOREMOVE = [os.path.normpath(p) for p in DONOTDELETE]
+NOREMOVE: List[str] = [os.path.normpath(p) for p in DONOTDELETE]
 
 
-def run(cmd, debug=False):
+def run(cmd: Sequence[str], debug: bool = False) -> Tuple[bool, str]:
     """run a command (expects a list)"""
     if debug:
         fcmd = ' '.join(cmd)
@@ -56,7 +60,7 @@ def run(cmd, debug=False):
     return ret == 0, lines
 
 
-def write_to_tmpfile(content):
+def write_to_tmpfile(content: bytes) -> str:
     """write some content to a tmp file"""
     path = get_tmpfile()
     with open(path, 'wb') as file:
@@ -64,7 +68,7 @@ def write_to_tmpfile(content):
     return path
 
 
-def shellrun(cmd, debug=False):
+def shellrun(cmd: str, debug: bool = False) -> Tuple[bool, str]:
     """
     run a command in the shell (expects a string)
     returns True|False, output
@@ -77,7 +81,7 @@ def shellrun(cmd, debug=False):
     return ret == 0, out
 
 
-def userinput(prompt, debug=False):
+def userinput(prompt: str, debug: bool = False) -> str:
     """
     get user input
     return user input
@@ -91,13 +95,13 @@ def userinput(prompt, debug=False):
     return res
 
 
-def fastdiff(left, right):
+def fastdiff(left: str, right: str) -> bool:
     """fast compare files and returns True if different"""
     return not filecmp.cmp(left, right, shallow=False)
 
 
-def diff(original, modified,
-         diff_cmd='', debug=False):
+def diff(original: str, modified: str,
+         diff_cmd: str = '', debug: bool = False) -> str:
     """compare two files, returns '' if same"""
     if not diff_cmd:
         diff_cmd = 'diff -r -u {0} {1}'
@@ -113,7 +117,7 @@ def diff(original, modified,
     return out
 
 
-def get_tmpdir():
+def get_tmpdir() -> str:
     """create and return the temporary directory"""
 # pylint: disable=W0603
     global TMPDIR
@@ -125,7 +129,7 @@ def get_tmpdir():
     return tmp
 
 
-def _get_tmpdir():
+def _get_tmpdir() -> str:
     """create the tmpdir"""
     try:
         if ENV_TEMP in os.environ:
@@ -140,21 +144,21 @@ def _get_tmpdir():
     return tempfile.mkdtemp(prefix='dotdrop-')
 
 
-def get_tmpfile():
+def get_tmpfile() -> str:
     """create a temporary file"""
     tmpdir = get_tmpdir()
     return tempfile.NamedTemporaryFile(prefix='dotdrop-',
                                        dir=tmpdir, delete=False).name
 
 
-def get_unique_tmp_name():
+def get_unique_tmp_name() -> str:
     """get a unique file name (not created)"""
     unique = str(uuid.uuid4())
     tmpdir = get_tmpdir()
     return os.path.join(tmpdir, unique)
 
 
-def removepath(path, logger=None):
+def removepath(path: str, logger: Optional[Logger] = None) -> bool:
     """
     remove a file/directory/symlink
     raises OSError in case of error
@@ -193,7 +197,7 @@ def removepath(path, logger=None):
     return True
 
 
-def samefile(path1, path2):
+def samefile(path1: str, path2: str) -> bool:
     """return True if represent the same file"""
     if not os.path.exists(path1):
         return False
@@ -320,8 +324,9 @@ def _must_ignore(path, ignores, neg_ignores,
     return True
 
 
-def must_ignore(paths, ignores, debug=False,
-                strict=False):
+def must_ignore(paths: List[str], ignores: Optional[List[str]],
+                debug: bool = False,
+                strict: bool = False) -> bool:
     """
     return true if any paths in list matches any ignore patterns
     """
@@ -370,7 +375,7 @@ def _cp(src, dst, ignore_func=None, debug=False):
     return 0
 
 
-def copyfile(src, dst, debug=False):
+def copyfile(src: str, dst: str, debug: bool = False) -> bool:
     """
     copy file from src to dst
     no dir expected!
@@ -379,9 +384,9 @@ def copyfile(src, dst, debug=False):
     return _cp(src, dst, debug=debug) == 1
 
 
-def uniq_list(a_list):
+def uniq_list(a_list: Optional[List[Any]]) -> List[Any]:
     """unique elements of a list while preserving order"""
-    new = []
+    new: List[Any] = []
     if not a_list:
         return new
     for elem in a_list:
@@ -390,7 +395,8 @@ def uniq_list(a_list):
     return new
 
 
-def ignores_to_absolute(ignores, prefixes, debug=False):
+def ignores_to_absolute(ignores: List[str], prefixes: List[str],
+                        debug: bool = False) -> List[str]:
     """allow relative ignore pattern"""
     new = []
     LOG.dbg(f'ignores before patching: {ignores}', force=debug)
@@ -425,7 +431,7 @@ def ignores_to_absolute(ignores, prefixes, debug=False):
     return new
 
 
-def get_module_functions(mod):
+def get_module_functions(mod: Any) -> List[Tuple[str, Callable[..., Any]]]:
     """return a list of fonction from a module"""
     funcs = []
     for memb in inspect.getmembers(mod):
@@ -436,7 +442,7 @@ def get_module_functions(mod):
     return funcs
 
 
-def get_module_from_path(path):
+def get_module_from_path(path: str):
     """get module from path"""
     if not path or not os.path.exists(path):
         return None
@@ -450,7 +456,7 @@ def get_module_from_path(path):
     return mod
 
 
-def dependencies_met():
+def dependencies_met():  # pylint: disable=too-many-statements
     """make sure all dependencies are met"""
     # check unix tools deps
     # diff command is checked in settings.py

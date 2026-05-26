@@ -6,6 +6,7 @@ handle the comparison of two dotfiles
 """
 
 import os
+from typing import List, Optional
 
 # local imports
 from dotdrop.logger import Logger
@@ -13,12 +14,15 @@ from dotdrop.ftree import FTreeDir
 from dotdrop.utils import must_ignore, diff, \
     get_file_perm
 
+__all__ = ['Comparator']
+
 
 class Comparator:
     """compare dotfiles helper"""
+    # pylint: disable=too-few-public-methods
 
-    def __init__(self, diff_cmd='', debug=False,
-                 ignore_missing_in_dotdrop=False):
+    def __init__(self, diff_cmd: str = '', debug: bool = False,
+                 ignore_missing_in_dotdrop: bool = False):
         """constructor
         @diff_cmd: diff command to use
         @debug: enable debug
@@ -29,7 +33,9 @@ class Comparator:
         self.log = Logger(debug=self.debug)
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
 
-    def compare(self, local_path, deployed_path, ignore=None, mode=None):
+    def compare(self, local_path: str, deployed_path: str,
+                ignore: Optional[List[str]] = None,
+                mode: Optional[int] = None) -> str:
         """
         diff local_path (dotdrop dotfile) and
         deployed_path (destination file)
@@ -47,9 +53,11 @@ class Comparator:
                              ignore=ignore, mode=mode,
                              recurse=True)
 
-    def _compare(self, local_path, deployed_path,
-                 ignore=None, mode=None,
-                 recurse=False):
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def _compare(self, local_path: str, deployed_path: str,
+                 ignore: Optional[List[str]] = None,
+                 mode: Optional[int] = None,
+                 recurse: bool = False) -> str:
         if not ignore:
             ignore = []
 
@@ -87,7 +95,8 @@ class Comparator:
             ret = self._comp_mode(local_path, deployed_path, mode=mode)
         return ret
 
-    def _comp_mode(self, local_path, deployed_path, mode=None):
+    def _comp_mode(self, local_path: str, deployed_path: str,
+                   mode: Optional[int] = None) -> str:
         """
         compare mode
         If mode is None, rights will be read on local_path
@@ -105,7 +114,8 @@ class Comparator:
         ret += f'({deployed_mode:o}) vs {local_mode:o}\n'
         return ret
 
-    def _comp_file(self, local_path, deployed_path, ignore):
+    def _comp_file(self, local_path: str, deployed_path: str,
+                   ignore: List[str]) -> str:
         """compare a file"""
         self.log.dbg(f'compare file {local_path} with {deployed_path}')
         if (self.ignore_missing_in_dotdrop and not
@@ -116,7 +126,8 @@ class Comparator:
             return ''
         return self._diff(local_path, deployed_path, header=True)
 
-    def _comp_dir(self, local_path, deployed_path, ignore):
+    def _comp_dir(self, local_path: str, deployed_path: str,
+                  ignore: List[str]) -> str:
         """compare a directory"""
         self.log.dbg(f'compare directory {local_path} with {deployed_path}')
         if not os.path.exists(deployed_path):
@@ -135,7 +146,8 @@ class Comparator:
 
         return self._compare_dirs2(local_path, deployed_path, ignore)
 
-    def _compare_dirs2(self, local_path, deployed_path, ignore):
+    def _compare_dirs2(self, local_path: str, deployed_path: str,
+                       ignore: List[str]) -> str:
         """compare directories"""
         self.log.dbg(f'compare dirs {local_path} and {deployed_path}')
         ret = []
@@ -171,7 +183,8 @@ class Comparator:
 
         return ''.join(ret)
 
-    def _diff(self, local_path, deployed_path, header=False):
+    def _diff(self, local_path: str, deployed_path: str,
+              header: bool = False) -> str:
         """diff two files"""
         out = diff(modified=local_path, original=deployed_path,
                    diff_cmd=self.diff_cmd, debug=self.debug)

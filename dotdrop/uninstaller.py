@@ -6,16 +6,22 @@ handle the un-installation of dotfiles
 """
 
 import os
+from typing import Tuple
+
 from dotdrop.logger import Logger
 from dotdrop.utils import removepath, dir_empty
+
+__all__ = ['Uninstaller']
 
 
 class Uninstaller:
     """dotfile uninstaller"""
+    # pylint: disable=too-few-public-methods
 
-    def __init__(self, base='.', workdir='~/.config/dotdrop',
-                 dry=False, safe=True, debug=False,
-                 backup_suffix='.dotdropbak'):
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def __init__(self, base: str = '.', workdir: str = '~/.config/dotdrop',
+                 dry: bool = False, safe: bool = True, debug: bool = False,
+                 backup_suffix: str = '.dotdropbak'):
         """
         @base: directory path where to search for templates
         @workdir: where to install template before symlinking
@@ -36,7 +42,8 @@ class Uninstaller:
         self.backup_suffix = backup_suffix
         self.log = Logger(debug=self.debug)
 
-    def uninstall(self, src, dst, linktype):
+    def uninstall(self, src: str, dst: str,
+                  linktype: object) -> Tuple[bool, str]:
         """
         uninstall dst
         @src: dotfile source path in dotpath
@@ -72,7 +79,7 @@ class Uninstaller:
                 self.log.sub(f'uninstall {dst}')
         return ret, msg
 
-    def _descend(self, dirpath):
+    def _descend(self, dirpath: str) -> Tuple[bool, str]:
         ret = True
         self.log.dbg(f'recursively uninstall {dirpath}')
         for sub in os.listdir(dirpath):
@@ -96,7 +103,7 @@ class Uninstaller:
         self.log.dbg(f'not removing non-empty dir {dirpath}')
         return ret, ''
 
-    def _remove_path(self, path):
+    def _remove_path(self, path: str) -> Tuple[bool, str]:
         """remove a file"""
         try:
             removepath(path)
@@ -105,7 +112,7 @@ class Uninstaller:
             return False, err
         return True, ''
 
-    def _remove(self, path):
+    def _remove(self, path: str) -> Tuple[bool, str]:
         """remove path"""
         self.log.dbg(f'handling uninstall of {path}')
         if path.endswith(self.backup_suffix):
@@ -131,7 +138,7 @@ class Uninstaller:
         self.log.dbg(f'removing {path}')
         return self._remove_path(path)
 
-    def _replace(self, path, backup):
+    def _replace(self, path: str, backup: str) -> Tuple[bool, str]:
         """replace path by backup"""
         if self.dry:
             self.log.dry(f'would \"mv {backup} {path}\"')
