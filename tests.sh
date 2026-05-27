@@ -48,7 +48,7 @@ if [ -n "${in_cicd}" ]; then
 fi
 
 # make sure both version.py and manpage dotdrop.1 are in sync
-dotdrop_version=$(grep version dotdrop/version.py | sed 's/^.*= .\(.*\).$/\1/g')
+dotdrop_version=$(grep version__: dotdrop/version.py | sed 's/^.*= .\(.*\).$/\1/g')
 man_version=$(grep '^\.TH' manpage/dotdrop.1  | sed 's/^.*"dotdrop-\(.*\)\" "Save your.*$/\1/g')
 if [ "${dotdrop_version}" != "${man_version}" ]; then
   echo "ERROR version.py (${dotdrop_version}) and manpage (${man_version}) differ!"

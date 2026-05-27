@@ -264,7 +264,9 @@ class Updater:
             return False
         return True
 
-    # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals,too-many-branches,too-many-statements
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments,too-many-locals
+    # pylint: disable=too-many-branches,too-many-statements
     def _handle_dir(self, deployed_path: str, local_path: str,
                     dotfile: object, ignores: List[str]) -> bool:
         """sync path (local dir) and local_path (dotdrop dir path)"""

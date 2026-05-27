@@ -66,7 +66,8 @@ class Settings(DictParser):
     # defaults
     default_diff_cmd = 'diff -r -u {0} {1}'
 
-    # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments,too-many-locals
     def __init__(self, backup: bool = True, banner: bool = True,
                  create: bool = True,
                  default_actions: Optional[List[str]] = None,

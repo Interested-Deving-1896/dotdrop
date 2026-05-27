@@ -23,7 +23,8 @@ class Dotfile(DictParser):
     key_trans_update = 'trans_update'
     key_template = 'template'
 
-    # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments,too-many-locals
     def __init__(self, key: str, dst: str, src: str,
                  actions: Optional[List[Action]] = None,
                  trans_install: Optional[List[Transform]] = None,
