@@ -10,6 +10,8 @@ import io
 import re
 import mmap
 import sys
+from typing import Any, Dict, List, Optional, Union
+
 from jinja2 import Environment, FileSystemLoader, \
     ChoiceLoader, FunctionLoader, TemplateNotFound, \
     StrictUndefined
@@ -21,6 +23,8 @@ from dotdrop import utils
 from dotdrop import jhelpers
 from dotdrop.logger import Logger
 from dotdrop.exceptions import UndefinedException
+
+__all__ = ['Templategen']
 
 BLOCK_START = '{%@@'
 BLOCK_END = '@@%}'
@@ -39,9 +43,12 @@ ENV_DOTDROP_MIME_TEXT = 'DOTDROP_MIME_TEXT'
 class Templategen:
     """dotfile templater"""
 
-    def __init__(self, base='.', variables=None,
-                 func_file=None, filter_file=None,
-                 debug=False):
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def __init__(self, base: str = '.',
+                 variables: Optional[Dict[str, Any]] = None,
+                 func_file: Optional[List[str]] = None,
+                 filter_file: Optional[List[str]] = None,
+                 debug: bool = False):
         """constructor
         @base: directory path where to search for templates
         @variables: dictionary of variables for templates
@@ -53,8 +60,8 @@ class Templategen:
         self.debug = debug
         self.log = Logger(debug=self.debug)
         self.log.dbg('loading templategen')
-        self.variables = {}
-        self.mime_text = []
+        self.variables: Dict[str, Any] = {}
+        self.mime_text: List[str] = []
         if ENV_DOTDROP_MIME_TEXT in os.environ:
             # retrieve a comma separated list of
             # mime types to treat as text
@@ -105,7 +112,7 @@ class Templategen:
         if self.debug:
             self._debug_dict('template additional variables', variables)
 
-    def generate(self, src):
+    def generate(self, src: str) -> Union[str, bytes]:
         """
         render template from path
         may raise a UndefinedException
@@ -119,7 +126,7 @@ class Templategen:
             err = f'undefined variable: {exc.message}'
             raise UndefinedException(err) from exc
 
-    def generate_string(self, string):
+    def generate_string(self, string: str) -> str:
         """
         render template from string
         may raise a UndefinedException
@@ -133,7 +140,7 @@ class Templategen:
             err = f'undefined variable: {exc.message}'
             raise UndefinedException(err) from exc
 
-    def generate_dict(self, dic):
+    def generate_dict(self, dic: Dict[str, Any]) -> Dict[str, Any]:
         """
         template each entry of the dict where only
         the value of each entry is templated (recursively)
@@ -153,7 +160,9 @@ class Templategen:
             continue
         return dic
 
-    def generate_string_or_dict(self, content):
+    def generate_string_or_dict(
+            self, content: Union[str, Dict[str, Any]]) -> Union[
+                str, Dict[str, Any]]:
         """
         render template from string or dict
         may raise a UndefinedException
@@ -165,7 +174,8 @@ class Templategen:
             return self.generate_dict(content)
         raise UndefinedException(f'could not template {content}')
 
-    def add_tmp_vars(self, newvars=None):
+    def add_tmp_vars(
+            self, newvars: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """add vars to the globals, make sure to call restore_vars"""
         saved_variables = self.variables.copy()
         if not newvars:
@@ -173,22 +183,22 @@ class Templategen:
         self.variables.update(newvars)
         return saved_variables
 
-    def restore_vars(self, saved_globals):
+    def restore_vars(self, saved_globals: Dict[str, Any]) -> None:
         """restore globals from add_tmp_vars"""
         self.variables = saved_globals.copy()
 
-    def update_variables(self, variables):
+    def update_variables(self, variables: Dict[str, Any]) -> None:
         """update variables"""
         self.variables.update(variables)
 
-    def _load_path_to_dic(self, path, dic):
+    def _load_path_to_dic(self, path: str, dic: Dict[str, Any]) -> None:
         mod = utils.get_module_from_path(path)
         if not mod:
             self.log.warn(f'cannot load module \"{path}\"')
             return
         self._load_funcs_to_dic(mod, dic)
 
-    def _load_funcs_to_dic(self, mod, dic):
+    def _load_funcs_to_dic(self, mod: Any, dic: Dict[str, Any]) -> None:
         """dynamically load functions from module to dic"""
         if not mod or not dic:
             return
@@ -198,11 +208,11 @@ class Templategen:
             dic[name] = func
 
     @classmethod
-    def _header(cls, prepend=''):
+    def _header(cls, prepend: str = '') -> str:
         """add a comment usually in the header of a dotfile"""
         return f'{prepend}{utils.header()}'
 
-    def _get_filetype(self, src):
+    def _get_filetype(self, src: str) -> str:
         """use magic or the file command to get the mime type of a file"""
         try:
             # pylint: disable=C0415
@@ -229,7 +239,7 @@ class Templategen:
             return self._get_filetype(dst)
         return filetype
 
-    def _handle_file(self, src):
+    def _handle_file(self, src: str) -> Union[str, bytes]:
         """generate the file content from template"""
         filetype = self._get_filetype(src)
         istext = self._is_text(filetype)
@@ -239,7 +249,7 @@ class Templategen:
             return self._handle_bin_file(src)
         return self._handle_text_file(src)
 
-    def _is_text(self, fileoutput):
+    def _is_text(self, fileoutput: str) -> bool:  # pylint: disable=too-many-return-statements
         """return if `file -b` output is ascii text"""
         out = fileoutput.lower()
         if out.startswith('text'):
@@ -258,7 +268,7 @@ class Templategen:
                 return True
         return False
 
-    def _template_loader(self, relpath):
+    def _template_loader(self, relpath: str) -> str:
         """manually load template when outside of base"""
         path = os.path.join(self.base, relpath)
         path = os.path.normpath(path)
@@ -268,7 +278,7 @@ class Templategen:
             content = file.read()
         return content
 
-    def _handle_text_file(self, src):
+    def _handle_text_file(self, src: str) -> bytes:
         """write text to file"""
         template_rel_path = os.path.relpath(src, self.base)
         try:
@@ -279,7 +289,7 @@ class Templategen:
             content = self.generate_string(data)
         return content.encode('utf-8')
 
-    def _handle_bin_file(self, src):
+    def _handle_bin_file(self, src: str) -> bytes:
         """write binary to file"""
         # this is dirty
         if not src.startswith(self.base):
@@ -289,14 +299,14 @@ class Templategen:
         return content
 
     @classmethod
-    def _read_bad_encoded_text(cls, path):
+    def _read_bad_encoded_text(cls, path: str) -> str:
         """decode non utf-8 data"""
         with open(path, 'rb') as file:
             data = file.read()
         return data.decode('utf-8', 'replace')
 
     @staticmethod
-    def path_is_template(path, debug=False):
+    def path_is_template(path: str, debug: bool = False) -> bool:
         """recursively check if any file is a template within path"""
         path = os.path.expanduser(path)
 
@@ -332,12 +342,12 @@ class Templategen:
         return False
 
     @staticmethod
-    def string_is_template(string):
+    def string_is_template(string: Any) -> bool:
         """check if variable contains template(s)"""
         return VAR_START in str(string)
 
     @staticmethod
-    def dict_is_template(dic):
+    def dict_is_template(dic: Dict[str, Any]) -> bool:
         """check if dict contains template(s)"""
         for key in dic:
             value = dic[key]
@@ -350,7 +360,7 @@ class Templategen:
         return False
 
     @staticmethod
-    def var_is_template(something):
+    def var_is_template(something: Union[str, Dict[str, Any]]) -> bool:
         """check if string or dict is template"""
         if isinstance(something, str):
             return Templategen.string_is_template(something)
@@ -359,7 +369,7 @@ class Templategen:
         return False
 
     @staticmethod
-    def _is_template(path, debug=False):
+    def _is_template(path: str, debug: bool = False) -> bool:
         """test if file pointed by path is a template"""
         if debug:
             Logger().dbg(f'is template: {path}')
@@ -381,7 +391,7 @@ class Templategen:
             return False
         return False
 
-    def _debug_dict(self, title, elems):
+    def _debug_dict(self, title: str, elems: Dict[str, Any]) -> None:
         """pretty print dict"""
         if not self.debug:
             return
