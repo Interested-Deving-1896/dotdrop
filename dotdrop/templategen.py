@@ -249,8 +249,9 @@ class Templategen:
             return self._handle_bin_file(src)
         return self._handle_text_file(src)
 
-    def _is_text(self, fileoutput: str) -> bool:  # pylint: disable=too-many-return-statements
+    def _is_text(self, fileoutput: str) -> bool:
         """return if `file -b` output is ascii text"""
+        # pylint: disable=too-many-return-statements
         out = fileoutput.lower()
         if out.startswith('text'):
             return True
