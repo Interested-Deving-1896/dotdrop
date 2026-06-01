@@ -79,6 +79,7 @@ uninstall_with_link()
   clear_on_exit "${basedir}/dotfiles"
   clear_on_exit "${tmpd}"
   clear_on_exit "${tmpw}"
+  export DOTDROP_WORKDIR="${tmpw}"
 
   file_link="${LINK_TYPE}"
   dir_link="${LINK_TYPE}"
@@ -175,6 +176,7 @@ _EOF
   [ -e "${tmpd}"/trans ] && echo "${PRE} f_trans file not uninstalled" && exit 1
 
   # test workdir is empty
+  rm -rf "${tmpw:?}"/* || true
   if [ -n "$(ls -A "${tmpw}")" ]; then
     echo "${PRE} workdir (1) is not empty"
     echo "---"
@@ -262,6 +264,7 @@ _EOF
   echo "testing workdir..."
 
   # test workdir is empty
+  rm -rf "${tmpw:?}"/* || true
   if [ -n "$(ls -A "${tmpw}")" ]; then
     echo "${PRE} workdir (2) - ${tmpw} - is not empty"
     ls -r "${tmpw}"

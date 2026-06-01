@@ -41,6 +41,7 @@ echo "workdir: ${tmpw}"
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 clear_on_exit "${tmpw}"
+export DOTDROP_WORKDIR="${tmpw}"
 
 # config file
 # create the config file

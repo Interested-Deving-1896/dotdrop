@@ -35,9 +35,14 @@ echo "[+] dotpath dir: ${tmps}/dotfiles"
 
 # dotfile destination
 tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+# workdir
+tmpw=$(mktemp -d --suffix='-dotdrop-workdir' || mktemp -d)
+
+export DOTDROP_WORKDIR="${tmpw}"
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
+clear_on_exit "${tmpw}"
 
 cat << _EOF > "${tmps}"/dotfiles/abc
 BEGIN

@@ -8,7 +8,7 @@ set -eu -o errtrace -o pipefail
 ## test doc external links
 echo "------------------------"
 echo "checking external links"
-find . -type f -iname '*.md' | while read -r line; do
+find . -path './.venv' -prune -o -type f -iname '*.md' -print | while read -r line; do
   ./scripts/check_links.py "${line}"
 done
 
@@ -25,7 +25,7 @@ if [ -n "${in_cicd}" ]; then
 
   echo "------------------------"
   echo "checking internal links"
-  find . -type f -iname '*.md' | while read -r line; do
+  find . -path './.venv' -prune -o -type f -iname '*.md' -print | while read -r line; do
     remark -f -u validate-links "${line}"
   done
 else

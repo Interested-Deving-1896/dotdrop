@@ -52,6 +52,7 @@ tmpw=$(mktemp -d --suffix='-dotdrop-workdir' || mktemp -d)
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 clear_on_exit "${tmpw}"
+export DOTDROP_WORKDIR="${tmpw}"
 
 clear_dotpath()
 {

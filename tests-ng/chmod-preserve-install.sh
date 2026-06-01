@@ -79,10 +79,16 @@ tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
 tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+# workdir
+tmpw=$(mktemp -d --suffix='-dotdrop-workdir' || mktemp -d)
+#echo "workdir: ${tmpw}"
+
+export DOTDROP_WORKDIR="${tmpw}"
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
+clear_on_exit "${tmpw}"
 
 # create the config file
 cfg="${tmps}/config.yaml"

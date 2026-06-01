@@ -33,10 +33,15 @@ mkdir -p "${tmps}"/dotfiles
 #echo "dotfile source: ${tmps}"
 # the dotfile destination
 tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+# workdir
+tmpw=$(mktemp -d --suffix='-dotdrop-workdir' || mktemp -d)
+#echo "dotfile workdir: ${tmpw}"
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
+clear_on_exit "${tmpw}"
+export DOTDROP_WORKDIR="${tmpw}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -46,7 +51,7 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  workdir: /tmp/xxx
+  workdir: ${tmpw}
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
@@ -70,7 +75,7 @@ cat "${tmpd}"/abc
 
 grep "^dotpath: ${tmps}/dotfiles$" "${tmpd}"/abc >/dev/null
 grep "^cfgpath: ${tmps}/config.yaml$" "${tmpd}"/abc >/dev/null
-grep "^workdir: /tmp/xxx$" "${tmpd}"/abc >/dev/null
+grep "^workdir: ${tmpw}$" "${tmpd}"/abc >/dev/null
 
 echo "OK"
 exit 0
