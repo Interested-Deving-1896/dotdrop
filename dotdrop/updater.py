@@ -264,7 +264,10 @@ class Updater:
         kept = set()
         normalized = [entry.rstrip(os.path.sep) for entry in entries]
         for entry in sorted(normalized, key=lambda x: x.count(os.path.sep)):
-            if any(entry == k or entry.startswith(k + os.path.sep) for k in kept):
+            if any(
+                entry == k or entry.startswith(k + os.path.sep)
+                for k in kept
+            ):
                 continue
             kept.add(entry)
             pruned.append(entry)
