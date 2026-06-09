@@ -18,10 +18,11 @@ class FTreeDir:
     directory tree for comparison
     """
 
-    def __init__(self, path, ignores=None, debug=False):
+    def __init__(self, path, ignores=None, debug=False, followlinks=False):
         self.path = path
         self.ignores = ignores
         self.debug = debug
+        self.followlinks = followlinks
         self.entries = []
         self.log = Logger(debug=self.debug)
         if os.path.exists(path) and os.path.isdir(path):
@@ -33,7 +34,8 @@ class FTreeDir:
         ignore empty directory
         test for ignore pattern
         """
-        for root, dirs, files in os.walk(self.path, followlinks=True):
+        for root, dirs, files in os.walk(self.path,
+                                        followlinks=self.followlinks):
             for file in files:
                 fpath = os.path.join(root, file)
                 if must_ignore([fpath], ignores=self.ignores,
@@ -44,7 +46,8 @@ class FTreeDir:
                 self.entries.append(fpath)
             for dname in dirs:
                 dpath = os.path.join(root, dname)
-                if dir_empty(dpath):
+                is_link = os.path.islink(dpath)
+                if not is_link and dir_empty(dpath):
                     # ignore empty directory
                     self.log.dbg(f'ignoring empty dir {dpath}')
                     continue

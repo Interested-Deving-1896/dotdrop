@@ -8,12 +8,13 @@ basic unittest for the update function
 import unittest
 import os
 
-from dotdrop.dotdrop import cmd_update
+from dotdrop.dotdrop import cmd_install, cmd_update
 from dotdrop.dotdrop import cmd_importer
 from dotdrop.action import Transform
 
 from tests.helpers import create_dir, get_string, get_tempdir, clean, \
-    create_random_file, create_fake_config, load_options, edit_content
+    create_random_file, create_fake_config, load_options, edit_content, \
+    populate_fake_config
 
 
 class TestUpdate(unittest.TestCase):
@@ -183,6 +184,60 @@ class TestUpdate(unittest.TestCase):
         with open(dotfilefile2, 'r', encoding='utf-8') as file:
             newcontent = file.read()
         self.assertTrue(newcontent == 'newcontentbykey')
+
+    def test_update_keeps_symlink_children(self):
+        """ensure update copies symlinks without dereferencing"""
+        # base directories
+        root = get_tempdir()
+        self.addCleanup(clean, root)
+        confpath = create_fake_config(root,
+                                      configname=self.CONFIG_NAME,
+                                      dotpath=self.CONFIG_DOTPATH,
+                                      backup=self.CONFIG_BACKUP,
+                                      create=self.CONFIG_CREATE)
+
+        dotpath = os.path.join(root, self.CONFIG_DOTPATH)
+        create_dir(dotpath)
+        src_dir = os.path.join(dotpath, 'whatever')
+        create_dir(src_dir)
+        # ensure installer has something to link
+        create_random_file(src_dir)
+
+        dst_dir = get_tempdir()
+        self.addCleanup(clean, dst_dir)
+
+        target_dir = get_tempdir()
+        self.addCleanup(clean, target_dir)
+        target_file, _ = create_random_file(target_dir, content='fromdest')
+
+        profile = get_string(5)
+        dotfiles = {
+            'd_whatever': {
+                'src': 'whatever',
+                'dst': dst_dir,
+                'link': 'link_children',
+            },
+        }
+        profiles = {profile: {'dotfiles': ['d_whatever']}}
+        populate_fake_config(confpath, dotfiles=dotfiles, profiles=profiles)
+
+        opt = load_options(confpath, profile)
+        opt.safe = False
+        opt.install_showdiff = True
+        opt.variables = {}
+
+        cmd_install(opt)
+
+        # user adds a new symlink inside the deployed directory
+        dst_link = os.path.join(dst_dir, 'newlink')
+        os.symlink(target_file, dst_link)
+
+        opt.update_path = [dst_dir]
+        cmd_update(opt)
+
+        src_link = os.path.join(src_dir, 'newlink')
+        self.assertTrue(os.path.islink(src_link))
+        self.assertEqual(os.readlink(src_link), os.readlink(dst_link))
 
 
 def main():

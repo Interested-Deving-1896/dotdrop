@@ -17,6 +17,7 @@ from dotdrop.utils import ignores_to_absolute, removepath, \
     get_unique_tmp_name, write_to_tmpfile, must_ignore, \
     mirror_file_rights, get_file_perm, diff
 from dotdrop.exceptions import UndefinedException
+from dotdrop.linktypes import LinkTypes
 
 
 TILD = '~'
@@ -137,7 +138,7 @@ class Updater:
                                    dotfile, ignores)
         else:
             ret = self._handle_file(new_path, local_path,
-                                    ignores)
+                                     ignores, linktype=dotfile.link)
         if not ret:
             return False
 
@@ -221,12 +222,57 @@ class Updater:
             self.log.err(exc)
 
     def _handle_file(self, deployed_path, local_path,
-                     ignores, compare=True):
+                     ignores, compare=True, linktype=None):
         """sync path (deployed file) and local_path (dotdrop dotfile path)"""
         if self._must_ignore([deployed_path, local_path], ignores):
             self.log.sub(f'\"{local_path}\" ignored')
             return True
         self.log.dbg(f'update for file {deployed_path} and {local_path}')
+        if os.path.islink(deployed_path):
+            if os.path.islink(local_path) or not os.path.exists(local_path):
+                return self._handle_symlink(deployed_path, local_path)
+
+            # if local is a file, ensure deployed link points to it
+            try:
+                target = os.readlink(deployed_path)
+                real_target = target
+                was_relative = not os.path.isabs(target)
+                if was_relative:
+                    real_target = os.path.realpath(
+                        os.path.join(os.path.dirname(deployed_path), target),
+                    )
+                expected = os.path.realpath(local_path)
+                if real_target == expected:
+                    self.log.dbg(
+                        f'symlink already targets {expected}: {deployed_path}',
+                    )
+                    return True
+
+                if os.path.lexists(deployed_path) and \
+                        not self._overwrite(local_path, deployed_path):
+                    return False
+
+                if self.dry:
+                    self.log.dry(
+                        f'would relink {deployed_path} to {expected}',
+                    )
+                    return True
+
+                removepath(deployed_path, logger=self.log)
+                prefer_relative = linktype == LinkTypes.RELATIVE
+                new_target = expected
+                if was_relative or prefer_relative:
+                    new_target = os.path.relpath(
+                        expected, os.path.dirname(deployed_path),
+                    )
+                os.symlink(new_target, deployed_path)
+                self.log.sub(f'"{deployed_path}" relinked')
+                return True
+            except OSError as exc:
+                msg = f'{deployed_path} relink failed: {exc}'
+                self.log.warn(msg)
+                return False
+
         if self._is_template(local_path):
             # dotfile is a template
             self.log.dbg(f'{local_path} is a template')
@@ -270,10 +316,12 @@ class Updater:
 
         local_tree = FTreeDir(local_path,
                               ignores=ignores,
-                              debug=self.debug)
+                              debug=self.debug,
+                              followlinks=False)
         deploy_tree = FTreeDir(deployed_path,
                                ignores=ignores,
-                               debug=self.debug)
+                               debug=self.debug,
+                               followlinks=False)
         lonly, ronly, common = local_tree.compare(deploy_tree)
 
         # those only in dotpath
@@ -299,6 +347,16 @@ class Updater:
                 # only in deployed dir
                 srcpath = os.path.join(deployed_path, i)
                 dstpath = os.path.join(local_path, i)
+                if os.path.islink(srcpath):
+                    if os.path.islink(dstpath) or not os.path.exists(dstpath):
+                        if not self._handle_symlink(srcpath, dstpath):
+                            ret = False
+                    else:
+                        if not self._handle_file(srcpath, dstpath,
+                                                 ignores, compare=False,
+                                                 linktype=dotfile.link):
+                            ret = False
+                    continue
                 if self.dry:
                     self.log.dry(f'would cp -r {srcpath} {dstpath}')
                     continue
@@ -320,6 +378,26 @@ class Updater:
         for i in common:
             srcpath = os.path.join(deployed_path, i)
             dstpath = os.path.join(local_path, i)
+            try:
+                if os.path.exists(srcpath) and os.path.exists(dstpath) and \
+                        os.path.realpath(srcpath) == os.path.realpath(dstpath):
+                    self.log.dbg(
+                        f'identical targets (realpath): {dstpath} and {srcpath}',
+                    )
+                    continue
+            except OSError:
+                pass
+            if os.path.islink(srcpath) or os.path.islink(dstpath):
+                if os.path.islink(srcpath) and (os.path.islink(dstpath) or
+                                                not os.path.exists(dstpath)):
+                    if not self._handle_symlink(srcpath, dstpath):
+                        ret = False
+                else:
+                    if not self._handle_file(srcpath, dstpath,
+                                             ignores, compare=False,
+                                             linktype=dotfile.link):
+                        ret = False
+                continue
             if os.path.isdir(srcpath):
                 continue
             if not self._same_rights(dstpath, srcpath):
@@ -347,14 +425,67 @@ class Updater:
 
     def _overwrite(self, src, dst):
         """ask for overwritting"""
-        msg = f'Overwrite \"{dst}\" with \"{src}\"?'
+        msg = f'Overwrite "{dst}" with "{src}"?'
         if self.safe and not self.log.ask(msg):
             return False
         return True
 
+    def _handle_symlink(self, src, dst):
+        """sync a symlink without dereferencing it"""
+        try:
+            target = os.readlink(src)
+        except OSError as exc:
+            msg = f'{src} update symlink failed, do manually: {exc}'
+            self.log.warn(msg)
+            return False
+
+        was_relative = not os.path.isabs(target)
+        src_dir = os.path.dirname(src)
+        real_target = target
+        if was_relative:
+            real_target = os.path.realpath(os.path.join(src_dir, target))
+
+        if os.path.islink(dst):
+            try:
+                cur_target = os.readlink(dst)
+                cur_real = cur_target
+                if not os.path.isabs(cur_target):
+                    cur_real = os.path.realpath(
+                        os.path.join(os.path.dirname(dst), cur_target),
+                    )
+                if cur_real == real_target:
+                    self.log.dbg(f'identical symlink: {dst} -> {cur_target}')
+                    return True
+            except OSError:
+                pass
+
+        if os.path.lexists(dst) and not self._overwrite(src, dst):
+            return False
+
+        if self.dry:
+            self.log.dry(f'would link {dst} to {real_target}')
+            return True
+
+        try:
+            if os.path.lexists(dst):
+                removepath(dst, logger=self.log)
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            link_target = real_target
+            if was_relative:
+                link_target = os.path.relpath(real_target,
+                                              os.path.dirname(dst))
+            os.symlink(link_target, dst)
+        except OSError as exc:
+            msg = f'{src} update symlink failed, do manually: {exc}'
+            self.log.warn(msg)
+            return False
+
+        self.log.sub(f'"{dst}" updated')
+        return True
+
     def _confirm_rm_r(self, directory):
         """ask for rm -r directory"""
-        msg = f'Recursively remove \"{directory}\"?'
+        msg = f'Recursively remove "{directory}"?'
         if self.safe and not self.log.ask(msg):
             return False
         return True
