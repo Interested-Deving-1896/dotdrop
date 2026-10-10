@@ -65,26 +65,26 @@ Direct commits to OSP or OOC are detected and opened as PRs back to `Interested-
 | [@japorized](https://github.com/japorized) | 4 |
 | [@shyun3](https://github.com/shyun3) | 4 |
 | [@open-dynaMIX](https://github.com/open-dynaMIX) | 4 |
-| [@jwodder](https://github.com/jwodder) | 3 |
-| [@sclu1034](https://github.com/sclu1034) | 3 |
 | [@Sighery](https://github.com/Sighery) | 3 |
-| [@Maelan](https://github.com/Maelan) | 2 |
-| [@marczz](https://github.com/marczz) | 2 |
+| [@sclu1034](https://github.com/sclu1034) | 3 |
+| [@jwodder](https://github.com/jwodder) | 3 |
 | [@maxwell-k](https://github.com/maxwell-k) | 2 |
-| [@vladkens](https://github.com/vladkens) | 1 |
-| [@superman32432432](https://github.com/superman32432432) | 1 |
-| [@roachsinai](https://github.com/roachsinai) | 1 |
-| [@ranjanashish](https://github.com/ranjanashish) | 1 |
-| [@maxchaos](https://github.com/maxchaos) | 1 |
-| [@laggardkernel](https://github.com/laggardkernel) | 1 |
-| [@dotiful](https://github.com/dotiful) | 1 |
-| [@cat-master21](https://github.com/cat-master21) | 1 |
-| [@brokenpip3](https://github.com/brokenpip3) | 1 |
-| [@belugame](https://github.com/belugame) | 1 |
-| [@severen](https://github.com/severen) | 1 |
-| [@samueloph](https://github.com/samueloph) | 1 |
-| [@samwhitlock](https://github.com/samwhitlock) | 1 |
+| [@marczz](https://github.com/marczz) | 2 |
+| [@Maelan](https://github.com/Maelan) | 2 |
 | [@richboss](https://github.com/richboss) | 1 |
+| [@samwhitlock](https://github.com/samwhitlock) | 1 |
+| [@samueloph](https://github.com/samueloph) | 1 |
+| [@severen](https://github.com/severen) | 1 |
+| [@belugame](https://github.com/belugame) | 1 |
+| [@brokenpip3](https://github.com/brokenpip3) | 1 |
+| [@cat-master21](https://github.com/cat-master21) | 1 |
+| [@dotiful](https://github.com/dotiful) | 1 |
+| [@laggardkernel](https://github.com/laggardkernel) | 1 |
+| [@maxchaos](https://github.com/maxchaos) | 1 |
+| [@ranjanashish](https://github.com/ranjanashish) | 1 |
+| [@roachsinai](https://github.com/roachsinai) | 1 |
+| [@superman32432432](https://github.com/superman32432432) | 1 |
+| [@vladkens](https://github.com/vladkens) | 1 |
 <!-- AI:end:contributors -->
 
 ## Origins
