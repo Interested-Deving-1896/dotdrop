@@ -65,26 +65,26 @@ Direct commits to OSP or OOC are detected and opened as PRs back to `Interested-
 | [@japorized](https://github.com/japorized) | 4 |
 | [@shyun3](https://github.com/shyun3) | 4 |
 | [@open-dynaMIX](https://github.com/open-dynaMIX) | 4 |
-| [@Sighery](https://github.com/Sighery) | 3 |
-| [@sclu1034](https://github.com/sclu1034) | 3 |
 | [@jwodder](https://github.com/jwodder) | 3 |
-| [@maxwell-k](https://github.com/maxwell-k) | 2 |
-| [@marczz](https://github.com/marczz) | 2 |
+| [@sclu1034](https://github.com/sclu1034) | 3 |
+| [@Sighery](https://github.com/Sighery) | 3 |
 | [@Maelan](https://github.com/Maelan) | 2 |
-| [@richboss](https://github.com/richboss) | 1 |
-| [@samwhitlock](https://github.com/samwhitlock) | 1 |
-| [@samueloph](https://github.com/samueloph) | 1 |
-| [@severen](https://github.com/severen) | 1 |
-| [@belugame](https://github.com/belugame) | 1 |
-| [@brokenpip3](https://github.com/brokenpip3) | 1 |
-| [@cat-master21](https://github.com/cat-master21) | 1 |
-| [@dotiful](https://github.com/dotiful) | 1 |
-| [@laggardkernel](https://github.com/laggardkernel) | 1 |
-| [@maxchaos](https://github.com/maxchaos) | 1 |
-| [@ranjanashish](https://github.com/ranjanashish) | 1 |
-| [@roachsinai](https://github.com/roachsinai) | 1 |
-| [@superman32432432](https://github.com/superman32432432) | 1 |
+| [@marczz](https://github.com/marczz) | 2 |
+| [@maxwell-k](https://github.com/maxwell-k) | 2 |
+| [@Interested-Deving-1896](https://github.com/Interested-Deving-1896) | 2 |
 | [@vladkens](https://github.com/vladkens) | 1 |
+| [@superman32432432](https://github.com/superman32432432) | 1 |
+| [@roachsinai](https://github.com/roachsinai) | 1 |
+| [@ranjanashish](https://github.com/ranjanashish) | 1 |
+| [@maxchaos](https://github.com/maxchaos) | 1 |
+| [@laggardkernel](https://github.com/laggardkernel) | 1 |
+| [@dotiful](https://github.com/dotiful) | 1 |
+| [@cat-master21](https://github.com/cat-master21) | 1 |
+| [@brokenpip3](https://github.com/brokenpip3) | 1 |
+| [@belugame](https://github.com/belugame) | 1 |
+| [@severen](https://github.com/severen) | 1 |
+| [@samueloph](https://github.com/samueloph) | 1 |
+| [@samwhitlock](https://github.com/samwhitlock) | 1 |
 <!-- AI:end:contributors -->
 
 ## Origins
@@ -102,18 +102,15 @@ _No additional resource files found._
 ## Accessibility
 
 <!-- AI:start:accessibility -->
-This repo uses automated accessibility auditing via `check-accessibility.yml`.
-
-Checks include: CODEOWNERS ownership coverage, README screen-reader compatibility,
-WCAG 2.1 AA HTML compliance, audio overview (espeak-ng), and Braille output (liblouis).
-
+No  was found when this README was generated. Check the
+[Actions tab](https://github.com/Interested-Deving-1896/dotdrop/actions) for repository-specific checks, and document an
+accessibility status only when a report or workflow provides evidence for it.
 
 
 
-Run the [Check Accessibility](https://github.com/Interested-Deving-1896/dotdrop/actions/workflows/check-accessibility.yml)
-workflow to generate the first report and accessibility artifacts.
+
 See the [W3C Web Content Accessibility Guidelines (WCAG)](https://www.w3.org/WAI/standards-guidelines/wcag/)
-for the underlying accessibility reference.
+for accessibility guidance.
 <!-- AI:end:accessibility -->
 
 ## License
